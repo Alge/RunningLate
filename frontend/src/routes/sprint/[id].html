@@ -6,7 +6,8 @@
 
 {#if $position}
   <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
-  <div>Remaining (?): { remainingDistance } m</div>
+  <div>Remaining distance: { interpolatedRemainingDistance } m</div>
+  <div>Progress: { Math.round(100*progress) }% </div>
   <div>Speed: { $position.speed }</div>
 {/if}
 
@@ -19,6 +20,13 @@
       remainingDistance: ({$position, sprint}) => calcCrow($position.coords, {
         latitude: sprint.endLat, longitude: sprint.endLong,
       }),
+      originalDistance: ({sprint}) => calcCrow({
+          latitude: sprint.startLat, longitude: sprint.startLong
+      }, {
+          latitude: sprint.endLat, longitude: sprint.endLong
+      }),
+      progress: ({originalDistance, remainingDistance}) => (1 - remainingDistance/originalDistance),
+      interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress)
     },
 
     async preload({ params, query }) {
