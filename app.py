@@ -167,7 +167,7 @@ def start_sprint():
 
     routes = travel_planner_recon(sprint.reconId)
 
-    if "error" not in route and route:
+    if route and "error" not in route:
         sprint.departure = routes['sprint_deadline_timetable']
 
     sprint.save()
