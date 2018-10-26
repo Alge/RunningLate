@@ -12,7 +12,20 @@
   {#each plan.legs as leg}
     <div class="leg">
       <div class="leg-title">{leg.from} -> {leg.to}</div>
-      <div>{(leg.arrival_time - leg.departure_time) / 60} minutes</div>
+      <div>
+        {#if leg.type === 'WALK'}
+          &#x1F6B6
+        {:elseif leg.type === 'BUS'}
+          &#x1F68C
+        {:elseif leg.type === 'METRO'}
+          &#x1F687
+        {:elseif leg.type === 'TRAIN'}
+          &#x1F682
+        {:else}
+          &#x2753
+        {/if}
+        {(leg.arrival_time - leg.departure_time) / 60} minutes
+      </div>
     </div>
   {/each}
 </div>
