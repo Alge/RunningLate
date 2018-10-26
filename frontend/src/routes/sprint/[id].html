@@ -6,6 +6,8 @@
 
 {#if $position}
   <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
+  <div>Remaining (?): { remainingDistance } m</div>
+  <div>Speed: { $position.speed }</div>
 {/if}
 
 <style>
@@ -13,6 +15,12 @@
 
 <script>
   export default {
+    computed: {
+      remainingDistance: ({$position, sprint}) => calcCrow($position.coords, {
+        latitude: sprint.endLat, longitude: sprint.endLong,
+      }),
+    },
+
     async preload({ params, query }) {
       const res = await this.fetch(`sprint/${params.id}.json`);
       const data = await res.json();
@@ -22,6 +30,29 @@
       } else {
         this.error(res.status, data.message);
       }
-    }
+    },
   };
+
+  // Distance, as the crows fly.
+  function calcCrow(start, end) {
+    if (!start || !end) return 0;
+
+    const R = 6371; // km
+    const dLatitude = asRadian(end.latitude - start.latitude);
+    const dLongitude = asRadian(end.longitude - start.longitude);
+    const startLatitude = asRadian(start.latitude);
+    const endLatitude = asRadian(end.latitude);
+
+    const a = Math.sin(dLatitude/2) * Math.sin(dLatitude/2) +
+      Math.sin(dLongitude/2) * Math.sin(dLongitude/2) *
+      Math.cos(startLatitude) * Math.cos(endLatitude);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const d = R * c;
+    return d * 1000; // km => m
+  }
+
+  // Converts numeric degrees to radians
+  function asRadian(degree) {
+    return degree * Math.PI / 180;
+  }
 </script>

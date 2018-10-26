@@ -13,6 +13,12 @@ polka() // You can also use Express
 		sirv('static', { dev }),
 		sapper.middleware({
       store: request => new Store({
+        position: {
+          coords: {
+            latitude: 59.3826,
+            longitude: 18.0285,
+          },
+        },
         backend: process.env.BACKEND,
       }),
     })
