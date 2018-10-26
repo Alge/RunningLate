@@ -73,17 +73,16 @@ class Sprint(BaseModel):
   departure = DateTimeField()
 
   def get_score(self):
-    duration = end-start
-    speed = distance / duration.total_seconds()
-    margin = (departure + datetime.timedelta(minutes=1) - end).total_seconds()
-
-    if marigin >= 0:
-      score -= marigin * C
+    duration = self.end-self.start
+    margin = (self.departure + datetime.timedelta(minutes=1) - self.end).total_seconds()
+    score = 0
+    if margin >= 0:
+      score += margin * PENALTY_CONSTANT
     else:
-      score -= marigin * 3 * C
+      
+      score -= 1000
       return score
-    score = (distance ** 1.2) / duration.total_seconds()
-    self.score = score
+    score = (self.distance ** 1.2) / duration.total_seconds()
     return score
 
   def get_json(self):
@@ -162,8 +161,10 @@ def get_sprint(id):
 
 @app.route('/start_sprint', methods = ['POST'])
 def start_sprint():
+
+  print(request.form)
   if request.method == 'POST' and request.form['startTime'] and request.form['startPosLat'] and request.form['endPosLat'] and request.form['startPosLong'] and request.form['endPosLat'] and request.form['username'] and request.form['distance'] and request.form['reconId']:
-    
+    print(request.form) 
     sprint = Sprint()
   
     user = User.get(User.username==request.form['username'])
@@ -172,6 +173,8 @@ def start_sprint():
     
     sprint.user = user
     sprint.start = dateutil.parser.parse(request.form['startTime'])
+    print(sprint.start)
+    print(type(sprint.start))
     sprint.startLat = request.form['startPosLat']
     sprint.startLong = request.form['startPosLong']
     sprint.endLat = request.form['endPosLat']
@@ -195,10 +198,10 @@ def end_sprint():
   if request.form['sprint']:
     sprint = Sprint.get(Sprint.id == int(request.form['sprint']))
     if sprint:
-      if sprint.end:
-        return json.dumps({"error":"Sprint already ended"})
+      #if sprint.end:
+      #  return json.dumps({"error":"Sprint already ended"})
       sprint.end = datetime.datetime.now()
-      sprint.score = sprint.distance
+      sprint.score = sprint.get_score()
       sprint.save()
       return json.dumps(sprint.get_json())
   return json.dumps({"error":"No such sprint"}) 
