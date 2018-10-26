@@ -14,7 +14,8 @@
   {:else}
   <div>You are { -remainingMinutes } min { -remainingSeconds } s late</div>
   {/if}
-  <div>In order to arrive in time you need to {#if requiredSpeed < 7}walk{:else}<strong>run</strong>{/if} {requiredSpeed.toFixed(1)} km/h</div>
+  <div>In order to arrive in time you need to {#if remainingTime > 0 && requiredSpeed < 7}walk{:else}<strong>run</strong>{/if} 
+      {#if remainingTime <= 0}∞{:else}{requiredSpeed.toFixed(1)}{/if} km/h</div>
   <div>Accuracy: { $position.coords.accuracy } m</div>
 </div>
 {/if}
