@@ -3,3 +3,4 @@ flask
 requests
 flask-cors
 python-dateutil
+bson

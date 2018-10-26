@@ -12,11 +12,21 @@ from peewee import *
 import json
 from playhouse.shortcuts import model_to_dict, dict_to_model
 from flask_cors import CORS
+import dateutil.parser
+from sl import travel_planner
+import time
+
 
 # config - aside from our database, the rest is for use by Flask
 DATABASE = 'runningLate.db'
 DEBUG = True
 SECRET_KEY = 'hin6bab8gasde25*r=x&amp;+5$0kn=-#log$pt^#@vrqjld!^2ci@g*b'
+
+
+def myconverter(o):
+  if isinstance(o, datetime.datetime):
+    return time.mktime(o.timetuple())
+
 
 # create a flask application - this ``app`` object will be used to handle
 # inbound requests, routing them to the proper 'view' functions, etc
@@ -45,29 +55,31 @@ class User(BaseModel):
     j["username"] = self.username
     j["sprints"] = []
     for sprint in self.sprints:
-      j["sprints"].append(sprint.get_json)
+      j["sprints"].append(sprint.get_json())
     return j 
 
 class Sprint(BaseModel): 
   user = ForeignKeyField(User, backref='sprints')
   start = DateTimeField()
-  end = DateTimeField()
-  startLat = DecimalField()
-  startLong = DecimalField()
-  endLat = DecimalField()
-  endLong = DecimalField()
-  score = DecimalField()
+  end = DateTimeField(null = True)
+  startLat = FloatField()
+  startLong = FloatField()
+  endLat = FloatField()
+  endLong = FloatField()
+  score = FloatField(null = True)
   
   def get_json(self):
     j = {}
     j["id"] = self.id
-    j["startTime"] = self.start.toString()
-    j["endTime"] = self.end.toString()
+    j["startTime"] = self.start.isoformat()
+    if self.end:
+      j["endTime"] = self.end.isoformat()
     j["startLat"] = self.startLat    
     j["startLong"] = self.startLong    
     j["endLat"] = self.endLat    
     j["endLong"] = self.endLong
-    j["score"] = self.score  
+    if self.score:
+      j["score"] = self.score  
     return j
 
 # simple utility function to create tables
@@ -104,7 +116,7 @@ def register():
     except IntegrityError:
       return json.dumps({"error":"Username already taken"})
 
-  return json.dumps(user) 
+  return json.dumps(user.get_json()) 
 
 @app.route('/user')
 def get_users():
@@ -132,11 +144,11 @@ def start_sprint():
       return "{'error':'no user with that username found'}"
     
     sprint.user = user
-    sprint.start = dateutil.parser(request.form['startTime'])
+    sprint.start = dateutil.parser.parse(request.form['startTime'])
     sprint.startLat = request.form['startPosLat']
-    sprint.startLat = request.form['startPosLong']
-    sprint.startLat = request.form['endPosLat']
-    sprint.startLat = request.form['endPosLong']
+    sprint.startLong = request.form['startPosLong']
+    sprint.endLat = request.form['endPosLat']
+    sprint.endLong = request.form['endPosLong']
     sprint.distance = request.form['distance']
     sprint.save()
     
@@ -146,14 +158,25 @@ def start_sprint():
 
 @app.route('/end_sprint')
 def end_sprint():
-    return render_template("index.html")
+  return render_template("index.html")
+
+
+@app.route('/get_route', methods=["GET", "POST"])
+def get_route():
+  if request.form['startLat'] and request.form['startLong'] and request.form['endLat'] and request.form['endLong']:
+    route = travel_planner((request.form['startLat'], request.form['startLong']), (request.form['endLat'], request.form['endLong']))
+    print (route)
+    return json.dumps(route, default = myconverter)
+  return "{'error':'wrong parameters supplied'}"
+ 
+
 
 @app.route('/get_path')
 def get_distance():
-    return render_template("index.html")
+  return render_template("index.html")
 
 
 # allow running from the command line
 if __name__ == '__main__':
-    create_tables()
-    app.run()
+  create_tables()
+  app.run()
