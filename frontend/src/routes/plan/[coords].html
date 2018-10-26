@@ -1,0 +1,139 @@
+<svelte:head>
+  <title>
+    To {plan.sprint_goal_name}
+    ({plan.sprint_goal_lat}x{plan.sprint_goal_long})
+  </title>
+</svelte:head>
+
+<h1>{plan.sprint_goal_name}</h1>
+<h2>{plan.sprint_distance} m away (should take {plan.sprint_duration} minutes)</h2>
+<h3>{margin} minutes to go
+  {#if margin < 0}
+    (It might be too late...)
+  {/if}
+</h3>
+
+<input type="button" value="Run for it!" on:click="sprint()">
+
+<div class='content'>
+  {#each plan.legs as leg}
+    <div class="leg">
+      <div class="leg-title">{leg.from} -> {leg.to}</div>
+      <div>
+        {#if leg.type === 'WALK'}
+          &#x1F6B6
+        {:elseif leg.type === 'BUS'}
+          &#x1F68C
+        {:elseif leg.type === 'METRO'}
+          &#x1F687
+        {:elseif leg.type === 'TRAIN'}
+          &#x1F682
+        {:else}
+          &#x2753
+        {/if}
+        {(leg.arrival_time - leg.departure_time) / 60} minutes
+      </div>
+    </div>
+  {/each}
+</div>
+
+<style>
+  .content {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: auto;
+  }
+
+  .leg {
+    padding: 1em;
+    margin: .5em;
+    border: 1px #eee solid;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+  }
+
+  .leg-title {
+    font-weight: bold;
+  }
+</style>
+
+<script>
+  import { goto } from '../../../__sapper__/client.js';
+
+  export default {
+    data() {
+      return {
+        plan: {
+          sprint_goal_name: "unDefINed",
+          legs: [],
+        },
+      };
+    },
+
+    computed: {
+      departure_time: ({plan}) => {
+        for (const leg of plan.legs) {
+          if (leg.type === 'WALK') continue;
+          return leg.departure_time;
+        }
+        return Date.now() / 1000;
+      },
+      margin: ({departure_time}) => {
+        const minutes = (departure_time - (Date.now() / 1000)) / 60;
+        return Math.floor(minutes);
+      },
+    },
+
+    async preload({ params, query }) {
+      // the `coords` parameter is available because
+      // this file is called [coords].html
+      const res = await this.fetch(`plan/${params.coords}.json`);
+      const data = await res.json();
+
+      console.log(data);
+      if (res.status === 200) {
+        if (data.error) {
+          this.error(400, data.error.errorText);
+          return;
+        }
+        return { plan: data };
+      } else {
+        this.error(res.status, data.error);
+      }
+    },
+
+    methods: {
+      async sprint() {
+        const {backend, position} = this.store.get();
+
+        const userform = new FormData();
+        userform.append('username', 'Segis');
+        await fetch(`${backend}/register`, {
+          method: 'POST',
+          body: userform,
+        });
+
+        const {plan} = this.get();
+        const form = new FormData();
+        form.append('username', 'Segis');
+        form.append('startPosLat', position.coords.latitude);
+        form.append('startPosLong', position.coords.longitude);
+        form.append('endPosLat', plan.sprint_goal_lat);
+        form.append('endPosLong', plan.sprint_goal_long);
+        form.append('distance', plan.sprint_distance);
+        // Remove the last 'Z'. :|
+        form.append('startTime', new Date().toISOString().slice(0, -1));
+        form.append('reconId', plan.recon_id);
+        const response = await fetch(`${backend}/start_sprint`, {
+          method: 'POST',
+          body: form,
+        });
+        const sprint = await response.json();
+
+        goto(`/sprint/${sprint.id}`);
+      },
+    },
+  };
+</script>
