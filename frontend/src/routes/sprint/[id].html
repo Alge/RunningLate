@@ -8,8 +8,12 @@
   <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
   <div>Remaining distance: { interpolatedRemainingDistance } m</div>
   <div>Progress: { Math.round(100*progress) }% </div>
-  <div>Speed: { $position.speed }</div>
+  <div>Accuracy: { $position.coords.accuracy } m</div>
 {/if}
+
+<input type="button" value="Made it!"
+    on:click="endSprint()"
+    disabled="{!completable}">
 
 <style>
 </style>
@@ -17,6 +21,8 @@
 <script>
   export default {
     computed: {
+      completable: ({remainingDistance, $position}) =>
+          remainingDistance < $position.coords.accuracy,
       remainingDistance: ({$position, sprint}) => calcCrow($position.coords, {
         latitude: sprint.endLat, longitude: sprint.endLong,
       }),
@@ -27,6 +33,19 @@
       }),
       progress: ({originalDistance, remainingDistance}) => (1 - remainingDistance/originalDistance),
       interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress)
+    },
+
+    methods: {
+      async endSprint() {
+        const form = new FormData();
+        form.append('sprint', this.get().sprint.id);
+
+        const { backend } = this.store.get();
+        await fetch(`${backend}/end_sprint`, {
+          method: 'POST',
+          body: form,
+        });
+      },
     },
 
     async preload({ params, query }) {
@@ -56,7 +75,7 @@
       Math.cos(startLatitude) * Math.cos(endLatitude);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const d = R * c;
-    return d * 1000; // km => m
+    return Math.round(d * 1000); // km => m
   }
 
   // Converts numeric degrees to radians

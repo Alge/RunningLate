@@ -13,7 +13,7 @@ class GeoStore extends Store {
 
     this.id = navigator.geolocation.watchPosition((position) => {
       this.set({position});
-    });
+    }, console.error, {enableHighAccuracy: true});
 
     return this;
   }

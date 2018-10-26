@@ -19,6 +19,7 @@ input {
   color: white;
   padding: 1em;
   transition: background-color .3s;
+  font-size: 16px;
 }
 
 input:hover {
@@ -27,6 +28,11 @@ input:hover {
 
 input:focus {
   background-color: rgba(255, 255, 255, .25);
+}
+
+input:disabled {
+  opacity: .5;
+  background-color: rgba(255, 255, 255, .45);
 }
 
 :focus {

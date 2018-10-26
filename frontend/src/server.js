@@ -15,8 +15,9 @@ polka() // You can also use Express
       store: request => new Store({
         position: {
           coords: {
+            accuracy: 1000,
             latitude: 59.3826,
-            longitude: 18.0285,
+            longitude: 18.0285, // 18
           },
         },
         backend: process.env.BACKEND,
