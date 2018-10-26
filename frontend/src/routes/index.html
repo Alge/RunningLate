@@ -2,30 +2,46 @@
   <title>Running Late!</title>
 </svelte:head>
 
-<h1>What's your name?</h1>
+<h1>Where to?</h1>
 
-<form on:submit="handleSubmit(event)">
-  <input bind:value=name type=text>
-  <button type=submit>"Login"</button>
-</form>
+<input on:input="debouncedSearch(this.value)" type=text>
+
+{#each results as result}
+  <p>
+    <a href="/{$position.coords.latitude},{$position.coords.longitude},{result.lat},{result.long}">
+      {result.name}
+    </a>
+  </p>
+{:else}
+  <p class="disabled">No results</p>
+{/each}
 
 <script>
   import { goto } from '../../__sapper__/client.js';
 
   export default {
     data() {
-      return {name: ''};
+      return {
+        results: [],
+      };
     },
 
     methods: {
-      handleSubmit(event) {
-        // prevent the page from reloading
-        event.preventDefault();
+      debouncedSearch(value) {
+        const { debounceId } = this.get();
+        if (debounceId) clearTimeout(debounceId);
+        if (!value) return;
+        this.set({
+          debounceId: setTimeout(() => this.search(value), 1000),
+        });
+      },
 
-        const { name } = this.get();
-
-        goto('/sprint');
-      }
-    }
+      search(value) {
+        const {backend} = this.store.get();
+        fetch(`${backend}/get_location/${value}`).then(res => res.json())
+            .then(results => this.set({results}),
+            console.error);
+      },
+    },
   };
 </script>
