@@ -101,6 +101,8 @@ def location_lookup(query):
                 'stationsonly': 'false'
                 }).json()
     result = []
+    if 'ResponseData' not in res:
+        return []
     for row in res['ResponseData']:
         result.append({
             'name': row['Name'],
