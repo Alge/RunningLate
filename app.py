@@ -22,6 +22,7 @@ from flask import abort
 DATABASE = 'runningLate.db'
 DEBUG = True
 SECRET_KEY = 'hin6bab8gasde25*r=x&amp;+5$0kn=-#log$pt^#@vrqjld!^2ci@g*b'
+PENALTY_CONSTANT = 1
 
 
 def myconverter(o):
@@ -71,6 +72,19 @@ class Sprint(BaseModel):
   reconId = CharField()
   departure = DateTimeField()
 
+  def get_score(self):
+    duration = end-start
+    speed = distance / duration.total_seconds()
+    margin = (departure + datetime.timedelta(minutes=1) - end).total_seconds()
+
+    if marigin >= 0:
+      score -= marigin * C
+    else:
+      score -= marigin * 3 * C
+      return score
+    score = (distance ** 1.2) / duration.total_seconds()
+    self.score = score
+    return score
 
   def get_json(self):
     j = {}
