@@ -212,7 +212,7 @@ def get_route():
   if request.form['startLat'] and request.form['startLong'] and request.form['endLat'] and request.form['endLong']:
     route = travel_planner((request.form['startLat'], request.form['startLong']), (request.form['endLat'], request.form['endLong']))
     if "error" in route:
-      return  json.dumps(route)
+      return  route
     if not route:
       abort(404)
     return json.dumps(route, default = myconverter)
