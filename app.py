@@ -13,7 +13,7 @@ import json
 from playhouse.shortcuts import model_to_dict, dict_to_model
 from flask_cors import CORS
 import dateutil.parser
-from sl import travel_planner, location_lookup
+from sl import travel_planner, location_lookup, travel_planner_recon
 import time
 from flask import abort
 
