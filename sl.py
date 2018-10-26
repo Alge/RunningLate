@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 import pprint
 
-from settings import TRAVELPLANNER_KEY
+from settings import TRAVELPLANNER_KEY, LOCATION_LOOKUP_KEY
 
 def travel_planner(origin, dest):
     """Get trip data from origin to destination
@@ -90,4 +90,23 @@ def _travel_planner_internal(res):
         }
     # pp = pprint.PrettyPrinter(indent=4)
     # pp.pprint(result)
+    return result
+
+
+def location_lookup(query):
+    res = requests.get('https://api.sl.se/api2/typeahead.json',
+            params={
+                'key': LOCATION_LOOKUP_KEY,
+                'searchstring': query,
+                'stationsonly': 'false'
+                }).json()
+    result = []
+    for row in res['ResponseData']:
+        result.append({
+            'name': row['Name'],
+            'site_id': row['SiteId'],
+            'type': row['Type'],
+            'lat': int(row['Y']) / 10**6,
+            'long': int(row['X']) / 10**6
+            })
     return result

@@ -13,7 +13,7 @@ import json
 from playhouse.shortcuts import model_to_dict, dict_to_model
 from flask_cors import CORS
 import dateutil.parser
-from sl import travel_planner
+from sl import travel_planner, location_lookup
 import time
 
 
@@ -189,6 +189,12 @@ def get_route():
     return json.dumps(route, default = myconverter)
   return "{'error':'wrong parameters supplied'}"
  
+
+@app.route('/get_location/<q>', methods=["GET"])
+def get_location(q):
+  res = location_lookup(q)
+  print(res)
+  return json.dumps(res, default = myconverter)
 
 
 @app.route('/get_path')
