@@ -47,6 +47,8 @@ self.addEventListener('fetch', event => {
 		event.respondWith(caches.match(event.request));
 		return;
 	}
+  // TODO(victorystick): Disable other kinds of caching for now.
+  return;
 
 	// for pages, you might want to serve a shell `index.html` file,
 	// which Sapper has generated for you. It's not right for every
