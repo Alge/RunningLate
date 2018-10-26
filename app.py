@@ -50,7 +50,6 @@ class User(BaseModel):
   username = CharField(unique=True)
   def get_json(self):
   
-    print(self.sprints)
     j = {}
     j["username"] = self.username
     j["sprints"] = []
@@ -182,7 +181,7 @@ def end_sprint():
   return json.dumps({"error":"No such sprint"}) 
 
 
-@app.route('/get_route', methods=["GET", "POST"])
+@app.route('/get_route', methods=["POST"])
 def get_route():
   if request.form['startLat'] and request.form['startLong'] and request.form['endLat'] and request.form['endLong']:
     route = travel_planner((request.form['startLat'], request.form['startLong']), (request.form['endLat'], request.form['endLong']))
@@ -193,7 +192,6 @@ def get_route():
 @app.route('/get_location/<q>', methods=["GET"])
 def get_location(q):
   res = location_lookup(q)
-  print(res)
   return json.dumps(res, default = myconverter)
 
 
