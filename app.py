@@ -69,7 +69,7 @@ class Sprint(BaseModel):
   score = FloatField(null = True)
   distance = FloatField()
   reconId = CharField()
-  departure = DateTimeField(null = True)
+  departure = DateTimeField()
 
 
   def get_json(self):
