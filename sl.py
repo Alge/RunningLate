@@ -71,7 +71,9 @@ def _travel_planner_internal(res):
                     leg['Origin']['date'] + " " + leg['Origin']['time']),
             'to': leg['Destination']['name'],
             'arrival_time': datetime.fromisoformat(
-                    leg['Destination']['date'] + " " + leg['Destination']['time'])
+                    leg['Destination']['date'] + " " + leg['Destination']['time']),
+            'type': leg['Product']['catOut'].strip() if 'Product' in leg else leg['type'],
+            'line': leg['Product']['name'] if 'Product' in leg else ''
             })
 
     result = {
