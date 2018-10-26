@@ -9,6 +9,8 @@ from flask import url_for, abort, render_template, flash
 from functools import wraps
 from hashlib import md5
 from peewee import *
+import json
+from playhouse.shortcuts import model_to_dict, dict_to_model
 
 # config - aside from our database, the rest is for use by Flask
 DATABASE = 'runningLate.db'
@@ -33,7 +35,12 @@ class BaseModel(Model):
         database = database
 
 class User(BaseModel):
-    username = CharField(unique=True)
+  username = CharField(unique=True)
+  
+  def get_json(self):
+    j = {}
+    j["username"] = self.username
+    return j 
 
 class Sprint(BaseModel):
     user = ForeignKeyField(User, backref='sprints')
@@ -67,9 +74,34 @@ def after_request(response):
 def homepage():
   return "hej!"
 
+@app.route('/register', methods=['POST'])
+def register():
+  if request.method == 'POST' and request.form['username']:
+    try:
+      with database.atomic():
+       # Attempt to create the user. If the username is taken, due to the
+       # unique constraint, the database will raise an IntegrityError.
+        user = User.create(username=request.form['username']) 
+
+    except IntegrityError:
+      return "Username already taken"
+
+  return json.dumps(user) 
+
 @app.route('/user')
-def get_user():
-    return render_template("index.html")
+def get_users():
+  users = []
+  for user in User.select():
+    users.append(user.get_json())
+  
+  return json.dumps(users)
+  
+@app.route('/user/<username>')
+def get_user(username):
+  user = User.get(User.username == username)
+  
+  return json.dumps(user.get_json())
+
 
 @app.route('/start_sprint')
 def start_sprint():
