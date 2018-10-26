@@ -202,7 +202,7 @@ def end_sprint():
     if sprint:
       #if sprint.end:
       #  return json.dumps({"error":"Sprint already ended"})
-      sprint.end = datetime.datetime.utcnow()
+      sprint.end = datetime.datetime.now()
       sprint.score = sprint.get_score()
       sprint.save()
       return json.dumps(sprint.get_json())
