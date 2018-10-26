@@ -11,15 +11,23 @@
   <div>Accuracy: { $position.coords.accuracy } m</div>
 {/if}
 
-<input type="button" value="Made it!"
-    on:click="endSprint()"
-    disabled="{!completable}">
+{#if !sprint.endTime}
+  <input type="button" value="Made it!"
+      on:click="endSprint()"
+      disabled="{!completable}">
+{/if}
 
 <style>
 </style>
 
 <script>
   export default {
+    data() {
+      return {
+        time: Date.now(),
+      };
+    },
+
     computed: {
       completable: ({remainingDistance, $position}) =>
           remainingDistance < $position.coords.accuracy,
@@ -46,6 +54,16 @@
           body: form,
         });
       },
+    },
+
+    oncreate() {
+      this.interval = setInterval(() => {
+        this.set({ time: Date.now() });
+      }, 5000); // every 5s, chosen arbitrarily
+    },
+
+    ondestroy() {
+			clearInterval(this.interval);
     },
 
     async preload({ params, query }) {
