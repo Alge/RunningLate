@@ -9,7 +9,12 @@
   <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
   <div>Remaining distance: { Math.round(interpolatedRemainingDistance) } m</div>
   <div>Progress: { Math.round(100*progress) }% </div>
+  {#if remainingTime >= 0}
   <div>Remaining time: { remainingMinutes } min {remainingSeconds} s</div>
+  {:else}
+  <div>You are { -remainingMinutes } min { -remainingSeconds } s late</div>
+  {/if}
+  <div>In order to arrive in time you need to {#if requiredSpeed < 7}walk{:else}run{/if} {requiredSpeed*3.6} km/h</div>
   <div>Accuracy: { $position.coords.accuracy } m</div>
 </div>
 {/if}
@@ -58,7 +63,8 @@
       interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress),
       remainingTime: ({sprint, time}) => Math.round((Date.parse(sprint.departure) - time) / 1000),
       remainingMinutes: ({remainingTime}) => Math.round(remainingTime / 60),
-      remainingSeconds: ({remainingTime}) => Math.round(remainingTime % 60)
+      remainingSeconds: ({remainingTime}) => Math.round(remainingTime % 60),
+      requiredSpeed: ({remainingTime, interpolatedRemainingDistance}) => (interpolatedRemainingDistance / remainingTime)*3.6
     },
 
     methods: {
