@@ -19,6 +19,13 @@
   {#each plan.legs as leg}
     <div class="leg">
       <div class="leg-title">{leg.from} -> {leg.to}</div>
+      <div class="small">
+        <!-- This is pretty terrible... -->
+        Departure: {
+          new Intl.DateTimeFormat('sv', {hour: 'numeric', minute: 'numeric'})
+            .format(new Date(leg.departure_time * 1000 - (1000 * 60 * 60 * 2)))
+        }
+      </div>
       <div>
         {#if leg.type === 'WALK'}
           &#x1F6B6
@@ -43,6 +50,11 @@
     flex-direction: column;
     max-width: 400px;
     margin: auto;
+  }
+
+  .small {
+    font-size: 12px;
+    font-weight: bold;
   }
 
   .leg {
@@ -82,7 +94,8 @@
       },
       margin: ({departure_time}) => {
         const minutes = (departure_time - (Date.now() / 1000)) / 60;
-        return Math.floor(minutes);
+        // We remove 2 hours becase... WTF? Something, something timezones.
+        return Math.floor(minutes - (60 * 2));
       },
     },
 

@@ -4,6 +4,10 @@
 
 <h1>{sprint.goalName}</h1>
 
+{#if sprint.score}
+  <h2>You got <b>{ Math.round(sprint.score) }</b> points!!</h2>
+{/if}
+
 {#if $position}
 <div class="info">
   <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
@@ -14,7 +18,7 @@
   {:else}
   <div>You are { -remainingMinutes } min { -remainingSeconds } s late</div>
   {/if}
-  <div>In order to arrive in time you need to {#if remainingTime > 0 && requiredSpeed < 7}walk{:else}<strong>run</strong>{/if} 
+  <div>In order to arrive in time you need to {#if remainingTime > 0 && requiredSpeed < 7}walk{:else}<strong>run</strong>{/if}
       {#if remainingTime <= 0}∞{:else}{requiredSpeed.toFixed(1)}{/if} km/h</div>
   <div>Accuracy: { $position.coords.accuracy } m</div>
 </div>
@@ -62,7 +66,8 @@
       }),
       progress: ({originalDistance, remainingDistance}) => (1 - remainingDistance/originalDistance),
       interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress),
-      remainingTime: ({sprint, time}) => Math.round((Date.parse(sprint.departure) - time) / 1000),
+      // Remove 60 here?
+      remainingTime: ({sprint, time}) => Math.round((Date.parse(sprint.departure) - time) / 1000) - (60 * 60),
       remainingMinutes: ({remainingTime}) => Math.round(remainingTime / 60),
       remainingSeconds: ({remainingTime}) => Math.round(remainingTime % 60),
       requiredSpeed: ({remainingTime, interpolatedRemainingDistance}) => (interpolatedRemainingDistance / remainingTime)*3.6
@@ -70,25 +75,37 @@
 
     methods: {
       async endSprint() {
+        clearInterval(this.interval);
+
         const form = new FormData();
         form.append('sprint', this.get().sprint.id);
 
         const { backend } = this.store.get();
-        await fetch(`${backend}/end_sprint`, {
+        const response = await fetch(`${backend}/end_sprint`, {
           method: 'POST',
           body: form,
         });
+        const sprint = await response.json();
+        this.set({ sprint });
       },
     },
 
     oncreate() {
+      const {sprint} = this.get();
+      if (sprint.endTime) {
+        this.set({
+          time: Date.parse(sprint.endTime) - (60 * 60),
+        });
+        return;
+      }
+
       this.interval = setInterval(() => {
         this.set({ time: Date.now() });
       }, 1000); // every 1s, chosen even more arbitrarily
     },
 
     ondestroy() {
-			clearInterval(this.interval);
+      clearInterval(this.interval);
     },
 
     async preload({ params, query }) {
