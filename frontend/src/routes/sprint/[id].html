@@ -5,19 +5,33 @@
 <h1>{sprint.goalName}</h1>
 
 {#if $position}
+<div class="info">
   <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
   <div>Remaining distance: { interpolatedRemainingDistance } m</div>
   <div>Progress: { Math.round(100*progress) }% </div>
   <div>Accuracy: { $position.coords.accuracy } m</div>
+</div>
 {/if}
 
 {#if !sprint.endTime}
   <input type="button" value="Made it!"
       on:click="endSprint()"
       disabled="{!completable}">
+  {#if remainingDistance < $position.coords.accuracy}
+    <span class="small">You just might be at the destination...</span>
+  {/if}
 {/if}
 
 <style>
+.info {
+  margin-bottom: 1.5em;
+}
+
+.small {
+  text-align: center;
+  font-size: 12px;
+  font-style: italic;
+}
 </style>
 
 <script>
