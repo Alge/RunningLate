@@ -86,6 +86,6 @@ def _travel_planner_internal(res):
             'legs': all_legs,
             'recon_id': trip['ctxRecon']
         }
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(result)
+    # pp = pprint.PrettyPrinter(indent=4)
+    # pp.pprint(result)
     return result
