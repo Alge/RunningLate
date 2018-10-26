@@ -20,8 +20,23 @@ def travel_planner(origin, dest):
                 'destCoordLat': dest[0],
                 'destCoordLong': dest[1]
                 }).json()
+    return _travel_planner_internal(res)
 
-    trip = res['Trip'][1]
+def travel_planner_recon(recon_id):
+    """Get trip data again for an already fetched trip
+
+    recon_id: the recon_id you got when you fetched the trip the first time
+    """
+    res = requests.get('https://api.sl.se/api2/TravelplannerV3/reconstruction.json',
+            params = {
+                'key': TRAVELPLANNER_KEY,
+                'ctx': recon_id
+                }).json()
+
+    return _travel_planner_internal(res)
+
+def _travel_planner_internal(res):
+    trip = res['Trip'][0]
 
     sprint_dist = 0
     sprint_duration = 0
