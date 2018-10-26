@@ -11,6 +11,7 @@ from hashlib import md5
 from peewee import *
 import json
 from playhouse.shortcuts import model_to_dict, dict_to_model
+from flask_cors import CORS
 
 # config - aside from our database, the rest is for use by Flask
 DATABASE = 'runningLate.db'
@@ -20,6 +21,7 @@ SECRET_KEY = 'hin6bab8gasde25*r=x&amp;+5$0kn=-#log$pt^#@vrqjld!^2ci@g*b'
 # create a flask application - this ``app`` object will be used to handle
 # inbound requests, routing them to the proper 'view' functions, etc
 app = Flask(__name__)
+CORS(app)
 app.config.from_object(__name__)
 
 # create a peewee database instance -- our models will use this database to
@@ -31,26 +33,42 @@ database = SqliteDatabase(DATABASE)
 # use the correct storage. for more information, see:
 # http://charlesleifer.com/docs/peewee/peewee/models.html#model-api-smells-like-django
 class BaseModel(Model):
-    class Meta:
-        database = database
+  class Meta:
+    database = database
 
 class User(BaseModel):
   username = CharField(unique=True)
+  def get_json(self):
+  
+    print(self.sprints)
+    j = {}
+    j["username"] = self.username
+    j["sprints"] = []
+    for sprint in self.sprints:
+      j["sprints"].append(sprint.get_json)
+    return j 
+
+class Sprint(BaseModel): 
+  user = ForeignKeyField(User, backref='sprints')
+  start = DateTimeField()
+  end = DateTimeField()
+  startLat = DecimalField()
+  startLong = DecimalField()
+  endLat = DecimalField()
+  endLong = DecimalField()
+  score = DecimalField()
   
   def get_json(self):
     j = {}
-    j["username"] = self.username
-    return j 
-
-class Sprint(BaseModel):
-    user = ForeignKeyField(User, backref='sprints')
-    start = DateTimeField()
-    end = DateTimeField()
-    startLat = DecimalField()
-    startLong = DecimalField()
-    endLat = DecimalField()
-    endLong = DecimalField()
-    score = DecimalField()
+    j["id"] = self.id
+    j["startTime"] = self.start.toString()
+    j["endTime"] = self.end.toString()
+    j["startLat"] = self.startLat    
+    j["startLong"] = self.startLong    
+    j["endLat"] = self.endLat    
+    j["endLong"] = self.endLong
+    j["score"] = self.score  
+    return j
 
 # simple utility function to create tables
 def create_tables():
@@ -84,7 +102,7 @@ def register():
         user = User.create(username=request.form['username']) 
 
     except IntegrityError:
-      return "Username already taken"
+      return json.dumps({"error":"Username already taken"})
 
   return json.dumps(user) 
 
@@ -103,9 +121,28 @@ def get_user(username):
   return json.dumps(user.get_json())
 
 
-@app.route('/start_sprint')
+@app.route('/start_sprint', methods = ['POST'])
 def start_sprint():
-    return render_template("index.html")
+  if request.method == 'POST' and request.form['startTime'] and request.form['startPosLat'] and request.form['endPosLat'] and request.form['startPosLong'] and request.form['endPosLat'] and request.form['username'] and request.form['distance']:
+    
+    sprint = Sprint()
+  
+    user = User.get(User.username==request.form['username'])
+    if not user:
+      return "{'error':'no user with that username found'}"
+    
+    sprint.user = user
+    sprint.start = dateutil.parser(request.form['startTime'])
+    sprint.startLat = request.form['startPosLat']
+    sprint.startLat = request.form['startPosLong']
+    sprint.startLat = request.form['endPosLat']
+    sprint.startLat = request.form['endPosLong']
+    sprint.distance = request.form['distance']
+    sprint.save()
+    
+    return json.dumps(sprint.get_json())
+  
+  return "failed"
 
 @app.route('/end_sprint')
 def end_sprint():
