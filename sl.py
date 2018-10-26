@@ -36,6 +36,10 @@ def travel_planner_recon(recon_id):
     return _travel_planner_internal(res)
 
 def _travel_planner_internal(res):
+    if "Trip" not in res:
+      if "ErrorDetails" in res:
+        return res["ErrorDetails"]["errorText"]
+      return False
     trip = res['Trip'][0]
 
     sprint_dist = 0
