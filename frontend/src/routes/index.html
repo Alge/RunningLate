@@ -8,7 +8,7 @@
 
 {#each results as result}
   <p>
-    <a href="/{$position.coords.latitude},{$position.coords.longitude},{result.lat},{result.long}">
+    <a href="/plan/{$position.coords.latitude},{$position.coords.longitude},{result.lat},{result.long}">
       {result.name}
     </a>
   </p>

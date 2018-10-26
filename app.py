@@ -71,6 +71,7 @@ class Sprint(BaseModel):
   distance = FloatField()
   reconId = CharField()
   departure = DateTimeField()
+  goal_name = DateTimeField()
 
   def get_score(self):
     duration = self.end-self.start
@@ -100,6 +101,7 @@ class Sprint(BaseModel):
     j["distance"] = self.distance
     j["reconId"] = self.reconId 
     j["departure"] = self.departure.isoformat()
+    j["goalName"] = self.goal_name
     return j
 
 # simple utility function to create tables
@@ -181,12 +183,12 @@ def start_sprint():
     sprint.endLong = request.form['endPosLong']
     sprint.distance = request.form['distance']
     sprint.reconId = request.form['reconId']
-
+    
     routes = travel_planner_recon(sprint.reconId)
 
     if routes and "error" not in routes:
         sprint.departure = routes['sprint_deadline_timetable']
-
+        sprint.goal_name = routes['sprint_goal_name']
     sprint.save()
     
     return json.dumps(sprint.get_json(), sort_keys=True, indent=4)

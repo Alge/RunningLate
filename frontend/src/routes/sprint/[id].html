@@ -1,0 +1,27 @@
+<svelte:head>
+  <title>Running Late!</title>
+</svelte:head>
+
+<h1>{sprint.goalName}</h1>
+
+{#if $position}
+  <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
+{/if}
+
+<style>
+</style>
+
+<script>
+  export default {
+    async preload({ params, query }) {
+      const res = await this.fetch(`sprint/${params.id}.json`);
+      const data = await res.json();
+
+      if (res.status === 200) {
+        return { sprint: data };
+      } else {
+        this.error(res.status, data.message);
+      }
+    }
+  };
+</script>
