@@ -1,0 +1,31 @@
+<svelte:head>
+  <title>Running Late!</title>
+</svelte:head>
+
+<h1>What's your name?</h1>
+
+<form on:submit="handleSubmit(event)">
+  <input bind:value=name type=text>
+  <button type=submit>"Login"</button>
+</form>
+
+<script>
+  import { goto } from '../../__sapper__/client.js';
+
+  export default {
+    data() {
+      return {name: ''};
+    },
+
+    methods: {
+      handleSubmit(event) {
+        // prevent the page from reloading
+        event.preventDefault();
+
+        const { name } = this.get();
+
+        goto('/sprint');
+      }
+    }
+  };
+</script>
