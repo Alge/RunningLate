@@ -67,7 +67,10 @@ class Sprint(BaseModel):
   endLat = FloatField()
   endLong = FloatField()
   score = FloatField(null = True)
-  
+  distance = FloatField()
+  reconId = CharField()
+
+
   def get_json(self):
     j = {}
     j["id"] = self.id
@@ -79,7 +82,9 @@ class Sprint(BaseModel):
     j["endLat"] = self.endLat    
     j["endLong"] = self.endLong
     if self.score:
-      j["score"] = self.score  
+      j["score"] = self.score 
+    j["distance"] = self.distance
+    j["reconId"] = self.reconId 
     return j
 
 # simple utility function to create tables
@@ -130,12 +135,18 @@ def get_users():
 def get_user(username):
   user = User.get(User.username == username)
   
-  return json.dumps(user.get_json())
+  return json.dumps(user.get_json(), sort_keys=True, indent=4)
+  
+@app.route('/sprint/<id>')
+def get_sprint(id):
+  sprint = Sprint.get(Sprint.id == id)
+  
+  return json.dumps(sprint.get_json(), sort_keys=True, indent=4)
 
 
 @app.route('/start_sprint', methods = ['POST'])
 def start_sprint():
-  if request.method == 'POST' and request.form['startTime'] and request.form['startPosLat'] and request.form['endPosLat'] and request.form['startPosLong'] and request.form['endPosLat'] and request.form['username'] and request.form['distance']:
+  if request.method == 'POST' and request.form['startTime'] and request.form['startPosLat'] and request.form['endPosLat'] and request.form['startPosLong'] and request.form['endPosLat'] and request.form['username'] and request.form['distance'] and request.form['reconId']:
     
     sprint = Sprint()
   
@@ -150,22 +161,31 @@ def start_sprint():
     sprint.endLat = request.form['endPosLat']
     sprint.endLong = request.form['endPosLong']
     sprint.distance = request.form['distance']
+    sprint.reconId = request.form['reconId']
     sprint.save()
     
-    return json.dumps(sprint.get_json())
+    return json.dumps(sprint.get_json(), sort_keys=True, indent=4)
   
   return "failed"
 
-@app.route('/end_sprint')
+@app.route('/end_sprint', methods=["POST"])
 def end_sprint():
-  return render_template("index.html")
+  if request.form['sprint']:
+    sprint = Sprint.get(Sprint.id == int(request.form['sprint']))
+    if sprint:
+      if sprint.end:
+        return json.dumps({"error":"Sprint already ended"})
+      sprint.end = datetime.datetime.now()
+      sprint.score = sprint.distance
+      sprint.save()
+      return json.dumps(sprint.get_json())
+  return json.dumps({"error":"No such sprint"}) 
 
 
 @app.route('/get_route', methods=["GET", "POST"])
 def get_route():
   if request.form['startLat'] and request.form['startLong'] and request.form['endLat'] and request.form['endLong']:
     route = travel_planner((request.form['startLat'], request.form['startLong']), (request.form['endLat'], request.form['endLong']))
-    print (route)
     return json.dumps(route, default = myconverter)
   return "{'error':'wrong parameters supplied'}"
  
