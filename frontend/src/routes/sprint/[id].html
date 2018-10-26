@@ -7,8 +7,9 @@
 {#if $position}
 <div class="info">
   <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
-  <div>Remaining distance: { interpolatedRemainingDistance } m</div>
+  <div>Remaining distance: { Math.round(interpolatedRemainingDistance) } m</div>
   <div>Progress: { Math.round(100*progress) }% </div>
+  <div>Remaining time: { remainingMinutes } min {remainingSeconds} s</div>
   <div>Accuracy: { $position.coords.accuracy } m</div>
 </div>
 {/if}
@@ -54,7 +55,10 @@
           latitude: sprint.endLat, longitude: sprint.endLong
       }),
       progress: ({originalDistance, remainingDistance}) => (1 - remainingDistance/originalDistance),
-      interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress)
+      interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress),
+      remainingTime: ({sprint, time}) => Math.round((Date.parse(sprint.departure) - time) / 1000),
+      remainingMinutes: ({remainingTime}) => Math.round(remainingTime / 60),
+      remainingSeconds: ({remainingTime}) => Math.round(remainingTime % 60)
     },
 
     methods: {
