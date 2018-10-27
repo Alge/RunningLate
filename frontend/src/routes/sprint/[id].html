@@ -67,7 +67,7 @@
       progress: ({originalDistance, remainingDistance}) => (1 - remainingDistance/originalDistance),
       interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress),
       // Remove 60 here?
-      remainingTime: ({sprint, time}) => Math.round((Date.parse(sprint.departure) - time) / 1000) - (60 * 60),
+      remainingTime: ({sprint, time}) => Math.round((Date.parse(sprint.departure) - time) / 1000) - (60 * 0),
       remainingMinutes: ({remainingTime}) => Math.round(remainingTime / 60),
       remainingSeconds: ({remainingTime}) => Math.round(remainingTime % 60),
       requiredSpeed: ({remainingTime, interpolatedRemainingDistance}) => (interpolatedRemainingDistance / remainingTime)*3.6
