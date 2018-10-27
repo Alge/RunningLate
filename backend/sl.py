@@ -6,10 +6,12 @@ import pprint
 from settings import TRAVELPLANNER_KEY, LOCATION_LOOKUP_KEY
 from pytz import timezone
 
+stockholm = timezone("Europe/Stockholm")
+utc = timezone("UTC")
+
 def stockholm_to_utc(sl_time):
-    stockholm = timezone("Europe/Stockholm")
     localized = stockholm.localize(sl_time)
-    return localized.utcnow()
+    return localized.astimezone(utc)
 
 def travel_planner(origin, dest):
     """Get trip data from origin to destination
