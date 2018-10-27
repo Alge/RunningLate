@@ -100,9 +100,8 @@ class Sprint(BaseModel):
       j["score"] = self.score 
     j["distance"] = self.distance
     j["reconId"] = self.reconId 
-    print(type(self.departure))
-    print(self.departure)
-    j["departure"] = time.mktime(self.departure.timetuple())
+    if isinstance(self.departure, str):
+      self.departure = dateutil.parser.parse(sprint.departure)j["departure"] = time.mktime(self.departure.timetuple())
     j["goalName"] = self.goal_name
     return j
 
@@ -188,6 +187,10 @@ def start_sprint():
 
     if routes and "error" not in routes:
         sprint.departure = routes['sprint_deadline_timetable']
+        if isinstance(sprint.departure, str):
+          sprint.departure = dateutil.parser.parse(sprint.departure)      
+        print(type(routes['sprint_deadline_timetable']))
+        print(routes['sprint_deadline_timetable'])
         sprint.goal_name = routes['sprint_goal_name']
     sprint.save()
     
