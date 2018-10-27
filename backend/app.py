@@ -217,6 +217,8 @@ def end_sprint():
 def get_route():
   if request.form['startLat'] and request.form['startLong'] and request.form['endLat'] and request.form['endLong']:
     route = travel_planner((request.form['startLat'], request.form['startLong']), (request.form['endLat'], request.form['endLong']))
+    if not route:
+      return "{'error':'SL failed'}"
     if "error" in route:
       return  route
     if not route:
