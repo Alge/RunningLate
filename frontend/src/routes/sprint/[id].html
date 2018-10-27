@@ -10,7 +10,7 @@
 
 {#if $position}
 <div class="info">
-  <div>Currently at: { $position.coords.latitude } x { $position.coords.longitude }</div>
+  <div>Currently at: { $position.coords.latitude.toFixed(4) } x { $position.coords.longitude.toFixed(4) }</div>
   <div>Remaining distance: { Math.round(interpolatedRemainingDistance) } m</div>
   <div>Progress: { Math.round(100*progress) }% </div>
   {#if remainingTime >= 0}
