@@ -28,7 +28,7 @@ PENALTY_CONSTANT = 1
 
 def myconverter(o):
   if isinstance(o, datetime.datetime):
-    return time.mktime(o.timetuple())
+    return time.mktime(o.timetuple()) + 7200
 
 
 # create a flask application - this ``app`` object will be used to handle
@@ -89,9 +89,9 @@ class Sprint(BaseModel):
   def get_json(self):
     j = {}
     j["id"] = self.id
-    j["startTime"] = time.mktime(self.start.timetuple())
+    j["startTime"] = time.mktime(self.start.timetuple()) + 7200
     if self.end:
-      j["endTime"] = time.mktime(self.end.timetuple())
+      j["endTime"] = time.mktime(self.end.timetuple()) + 7200
     j["startLat"] = self.startLat
     j["startLong"] = self.startLong
     j["endLat"] = self.endLat
@@ -102,7 +102,7 @@ class Sprint(BaseModel):
     j["reconId"] = self.reconId
     if isinstance(self.departure, str):
       self.departure = dateutil.parser.parse(self.departure)
-    j["departure"] = time.mktime(self.departure.timetuple())
+    j["departure"] = time.mktime(self.departure.timetuple()) + 7200
     j["goalName"] = self.goal_name
     return j
 
