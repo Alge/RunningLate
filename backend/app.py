@@ -101,7 +101,8 @@ class Sprint(BaseModel):
     j["distance"] = self.distance
     j["reconId"] = self.reconId 
     if isinstance(self.departure, str):
-      self.departure = dateutil.parser.parse(sprint.departure)j["departure"] = time.mktime(self.departure.timetuple())
+      self.departure = dateutil.parser.parse(self.departure)
+    j["departure"] = time.mktime(self.departure.timetuple())
     j["goalName"] = self.goal_name
     return j
 
