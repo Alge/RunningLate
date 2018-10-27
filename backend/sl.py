@@ -2,6 +2,7 @@ import requests
 from datetime import datetime
 import json
 import pprint
+import dateutil.parser
 
 from settings import TRAVELPLANNER_KEY, LOCATION_LOOKUP_KEY
 from pytz import timezone
@@ -11,7 +12,9 @@ utc = timezone("UTC")
 
 def stockholm_to_utc(sl_time):
     localized = stockholm.localize(sl_time)
-    return localized.astimezone(utc)
+    in_utc = localized.astimezone(utc)
+    not_tz_aware = dateutil.parser.parse(in_utc.isoformat()[:-6])
+    return not_tz_aware
 
 def travel_planner(origin, dest):
     """Get trip data from origin to destination

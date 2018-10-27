@@ -28,7 +28,7 @@ PENALTY_CONSTANT = 1
 
 def myconverter(o):
   if isinstance(o, datetime.datetime):
-    return time.mktime(o.timetuple()) + 60*60
+    return time.mktime(o.timetuple())
 
 
 # create a flask application - this ``app`` object will be used to handle
