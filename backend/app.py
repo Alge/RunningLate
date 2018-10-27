@@ -100,7 +100,7 @@ class Sprint(BaseModel):
       j["score"] = self.score 
     j["distance"] = self.distance
     j["reconId"] = self.reconId 
-    j["departure"] = self.departure.isoformat()
+    j["departure"] = time.mktime((self.departure - datetime.timedelta(hours=-2)).timetuple())
     j["goalName"] = self.goal_name
     return j
 
@@ -165,7 +165,7 @@ def get_sprint(id):
 def start_sprint():
 
   print(request.form)
-  if request.method == 'POST' and request.form['startTime'] and request.form['startPosLat'] and request.form['endPosLat'] and request.form['startPosLong'] and request.form['endPosLat'] and request.form['username'] and request.form['distance'] and request.form['reconId']:
+  if request.method == 'POST' and request.form['startPosLat'] and request.form['endPosLat'] and request.form['startPosLong'] and request.form['endPosLat'] and request.form['username'] and request.form['distance'] and request.form['reconId']:
     print(request.form) 
     sprint = Sprint()
   
@@ -174,9 +174,7 @@ def start_sprint():
       return "{'error':'no user with that username found'}"
     
     sprint.user = user
-    sprint.start = dateutil.parser.parse(request.form['startTime'])
-    print(sprint.start)
-    print(type(sprint.start))
+    sprint.start = datetime.datetime.utcnow()
     sprint.startLat = request.form['startPosLat']
     sprint.startLong = request.form['startPosLong']
     sprint.endLat = request.form['endPosLat']
@@ -202,7 +200,7 @@ def end_sprint():
     if sprint:
       #if sprint.end:
       #  return json.dumps({"error":"Sprint already ended"})
-      sprint.end = datetime.datetime.now()
+      sprint.end = datetime.datetime.utcnow()
       sprint.score = sprint.get_score()
       sprint.save()
       return json.dumps(sprint.get_json())
@@ -216,7 +214,9 @@ def get_route():
     if "error" in route:
       return  route
     if not route:
-      abort(404)
+      abort(404)  
+    print(route)
+    print(json.dumps(route, default = myconverter))
     return json.dumps(route, default = myconverter)
   return "{'error':'wrong parameters supplied'}"
  
