@@ -83,7 +83,7 @@ class Sprint(BaseModel):
 
       score -= 1000
       return score
-    score = (self.distance ** 1.2) / duration.total_seconds()
+    score += (self.distance ** 1.2) / duration.total_seconds()
     return score
 
   def get_json(self):
