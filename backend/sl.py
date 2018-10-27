@@ -4,6 +4,12 @@ import json
 import pprint
 
 from settings import TRAVELPLANNER_KEY, LOCATION_LOOKUP_KEY
+from pytz import timezone
+
+def stockholm_to_utc(sl_time):
+    stockholm = timezone("Europe/Stockholm")
+    localized = stockholm.localize(sl_time)
+    return localized.utcnow()
 
 def travel_planner(origin, dest):
     """Get trip data from origin to destination
@@ -63,19 +69,19 @@ def _travel_planner_internal(res):
                 sprint_goal_name = leg['Origin']['name']
                 sprint_goal_type = leg['Product']['name']
 
-                sprint_deadline_timetable = datetime.fromisoformat(
-                        leg['Origin']['date'] + " " + leg['Origin']['time'])
+                sprint_deadline_timetable = stockholm_to_utc(datetime.fromisoformat(
+                        leg['Origin']['date'] + " " + leg['Origin']['time']))
                 if 'rtTime' in leg['Origin']:
-                    sprint_deadline_realtime = datetime.fromisoformat(
-                            leg['Origin']['rtDate'] + " " + leg['Origin']['rtTime'])
+                    sprint_deadline_realtime = stockholm_to_utc(datetime.fromisoformat(
+                            leg['Origin']['rtDate'] + " " + leg['Origin']['rtTime']))
 
         all_legs.append({
             'from': leg['Origin']['name'],
-            'departure_time': datetime.fromisoformat(
-                    leg['Origin']['date'] + " " + leg['Origin']['time']),
+            'departure_time': stockholm_to_utc(datetime.fromisoformat(
+                    leg['Origin']['date'] + " " + leg['Origin']['time'])),
             'to': leg['Destination']['name'],
-            'arrival_time': datetime.fromisoformat(
-                    leg['Destination']['date'] + " " + leg['Destination']['time']),
+            'arrival_time': stockholm_to_utc(datetime.fromisoformat(
+                    leg['Destination']['date'] + " " + leg['Destination']['time'])),
             'type': leg['Product']['catOut'].strip() if 'Product' in leg else leg['type'],
             'line': leg['Product']['name'] if 'Product' in leg else ''
             })
