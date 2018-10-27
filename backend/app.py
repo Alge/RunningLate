@@ -89,9 +89,9 @@ class Sprint(BaseModel):
   def get_json(self):
     j = {}
     j["id"] = self.id
-    j["startTime"] = self.start.isoformat()
+    j["startTime"] = time.mktime(self.start.timetuple())
     if self.end:
-      j["endTime"] = self.end.isoformat()
+      j["endTime"] = time.mktime(self.end.timetuple())
     j["startLat"] = self.startLat    
     j["startLong"] = self.startLong    
     j["endLat"] = self.endLat    
@@ -100,7 +100,9 @@ class Sprint(BaseModel):
       j["score"] = self.score 
     j["distance"] = self.distance
     j["reconId"] = self.reconId 
-    j["departure"] = time.mktime((self.departure - datetime.timedelta(hours=-2)).timetuple())
+    print(type(self.departure))
+    print(self.departure)
+    j["departure"] = time.mktime(self.departure.timetuple())
     j["goalName"] = self.goal_name
     return j
 
