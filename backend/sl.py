@@ -53,9 +53,9 @@ def _travel_planner_internal(res):
     sprint_dist = 0
     sprint_duration = 0
     sprint_goal_coords = ()
-    sprint_goal_name = ""
-    sprint_goal_type = ""
-    sprint_deadline_timetable = ""
+    sprint_goal_name = None
+    sprint_goal_type = None
+    sprint_deadline_timetable = None
     sprint_deadline_realtime = None
     sprint_done = False
     all_legs = []
