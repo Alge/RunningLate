@@ -49,7 +49,7 @@
   export default {
     data() {
       return {
-        time: Date.now(),
+        time: Date.now() / 1000,
       };
     },
 
@@ -67,7 +67,7 @@
       progress: ({originalDistance, remainingDistance}) => (1 - remainingDistance/originalDistance),
       interpolatedRemainingDistance: ({sprint, progress}) => sprint.distance * (1-progress),
       // Remove 60 here?
-      remainingTime: ({sprint, time}) => Math.round((Date.parse(sprint.departure) - time) / 1000) - (60 * 0),
+      remainingTime: ({sprint, time}) => Math.round(sprint.departure - time),
       remainingMinutes: ({remainingTime}) => Math.round(remainingTime / 60),
       remainingSeconds: ({remainingTime}) => Math.round(remainingTime % 60),
       requiredSpeed: ({remainingTime, interpolatedRemainingDistance}) => (interpolatedRemainingDistance / remainingTime)*3.6
@@ -93,14 +93,12 @@
     oncreate() {
       const {sprint} = this.get();
       if (sprint.endTime) {
-        this.set({
-          time: Date.parse(sprint.endTime) - (60 * 60),
-        });
+        this.set({ time: sprint.endTime });
         return;
       }
 
       this.interval = setInterval(() => {
-        this.set({ time: Date.now() });
+        this.set({ time: Date.now() / 1000 });
       }, 1000); // every 1s, chosen even more arbitrarily
     },
 
